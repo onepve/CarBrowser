@@ -43,13 +43,14 @@ jobs:
             echo "::error::Release APK not found!"
             exit 1
           fi
-          echo "Found APK: $APK_SRC"
-          cp "$APK_SRC" dist/CarBrowser_1.0.0.apk
+          TAG_RAW="${GITHUB_REF_NAME:-v1.0.1}"
+          VER="${TAG_RAW#v}"
+          echo "Building asset for version: ${VER}"
+          cp "$APK_SRC" "dist/CarBrowser_${VER}.apk"
           cd dist
-          md5sum CarBrowser_1.0.0.apk > CarBrowser_1.0.0.apk.md5
-          sha256sum CarBrowser_1.0.0.apk > CarBrowser_1.0.0.apk.sha256
-          echo "MD5: $(cat CarBrowser_1.0.0.apk.md5)"
-          echo "SHA256: $(cat CarBrowser_1.0.0.apk.sha256)"
+          md5sum "CarBrowser_${VER}.apk" > "CarBrowser_${VER}.apk.md5"
+          sha256sum "CarBrowser_${VER}.apk" > "CarBrowser_${VER}.apk.sha256"
+          cat "CarBrowser_${VER}.apk.md5"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -62,16 +63,14 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name || 'v1.0.0' }}
-          name: CarBrowser ${{ github.ref_name || 'v1.0.0' }}
+          tag_name: ${{ github.ref_name || 'v1.0.1' }}
+          name: CarBrowser ${{ github.ref_name || 'v1.0.1' }}
           body: |
-            ## 极轻车机浏览器 v1.0.0
+            ## 极轻车机浏览器 ${{ github.ref_name || 'v1.0.1' }}
             - 专为吉利车机大屏（1920x720）横屏定制
+            - 内置本地极速车规大磁贴导航页（0毫秒加载，0流量，告别必应大图壁纸卡顿）
             - 顶部常驻车规大胶囊按钮（后退、前进、刷新、主页、常用收藏、退出）
             - 预置国内常用网站收藏夹（哔哩哔哩、抖音、爱奇艺、腾讯视频、优酷、微信读书、QQ阅读、网易云、QQ音乐、百度、必应、DeepSeek、Kimi、懂车帝等）
             - 默认下载路径定向至车机 Download 目录
             - 极轻原生 WebView 架构，体积小、低内存无卡顿
-          files: |
-            dist/CarBrowser_1.0.0.apk
-            dist/CarBrowser_1.0.0.apk.md5
-            dist/CarBrowser_1.0.0.apk.sha256
+          files: dist/*

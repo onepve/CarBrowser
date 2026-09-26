@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>吉利车机极轻导航</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #101012;
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+        .logo-badge {
+            width: 36px;
+            height: 36px;
+            background: #24242a;
+            border: 1px solid #3b82f6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #f59e0b;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #f3f4f6;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            background: #18181c;
+            border: 1.5px solid #2b2b34;
+            border-radius: 28px;
+            padding: 6px 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            align-items: center;
+        }
+        .search-container:focus-within {
+            border-color: #f59e0b;
+        }
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f3f4f6;
+            font-size: 16px;
+            padding: 8px 10px;
+        }
+        .search-btn {
+            background: #f59e0b;
+            color: #101012;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 分类切换 */
+        .categories {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding-bottom: 4px;
+        }
+        .cat-btn {
+            background: #1e1e24;
+            border: 1px solid #2b2b34;
+            color: #9ca3af;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .cat-btn.active {
+            background: #2b2b34;
+            color: #f59e0b;
+            border-color: #f59e0b;
+            font-weight: 600;
+        }
+
+        /* 磁贴网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            width: 100%;
+            max-width: 1080px;
+        }
+        .tile {
+            display: flex;
+            align-items: center;
+            background: #18181c;
+            border: 1px solid #282830;
+            border-radius: 14px;
+            padding: 12px 14px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.1s, background 0.15s, border-color 0.15s;
+        }
+        .tile:active {
+            transform: scale(0.97);
+            background: #25252d;
+            border-color: #f59e0b;
+        }
+        .tile-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #24242c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #f59e0b;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .tile-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .tile-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f3f4f6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tile-desc {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-badge">🚗</div>
+        <div class="header-title">极轻车机大屏导航</div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="输入网址或在百度中搜索..." onkeydown="handleKey(event)">
+        <button class="search-btn" onclick="goSearch()">搜索</button>
+    </div>
+
+    <!-- 分类 -->
+    <div class="categories">
+        <button class="cat-btn active" onclick="filterCat('all', this)">全部推荐</button>
+        <button class="cat-btn" onclick="filterCat('video', this)">影音娱乐</button>
+        <button class="cat-btn" onclick="filterCat('audio', this)">听书阅读</button>
+        <button class="cat-btn" onclick="filterCat('ai', this)">搜索与 AI</button>
+        <button class="cat-btn" onclick="filterCat('car', this)">汽车社区</button>
+    </div>
+
+    <!-- 磁贴列表 -->
+    <div class="grid" id="tileGrid">
+        <!-- 影音 -->
+        <a href="https://www.bilibili.com" class="tile" data-cat="video">
+            <div class="tile-icon" style="color:#fb7299;">哔</div>
+            <div class="tile-info">
+                <div class="tile-name">哔哩哔哩</div>
+                <div class="tile-desc">bilibili.com</div>
+            </div>
+        </a>
+        <a href="https://www.douyin.com" class="tile" data-cat="video">
+            <div class="tile-icon" style="color:#fe2c55;">抖</div>
+            <div class="tile-info">
+                <div class="tile-name">抖音网页版</div>
+                <div class="tile-desc">douyin.com</div>
+            </div>
+        </a>
+        <a href="https://v.qq.com" class="tile" data-cat="video">
+            <div class="tile-icon" style="color:#ff8200;">腾</div>
+            <div class="tile-info">
+                <div class="tile-name">腾讯视频</div>
+                <div class="tile-desc">v.qq.com</div>
+            </div>
+        </a>
+        <a href="https://www.iqiyi.com" class="tile" data-cat="video">
+            <div class="tile-icon" style="color:#00c06d;">爱</div>
+            <div class="tile-info">
+                <div class="tile-name">爱奇艺</div>
+                <div class="tile-desc">iqiyi.com</div>
+            </div>
+        </a>
+        <a href="https://www.youku.com" class="tile" data-cat="video">
+            <div class="tile-icon" style="color:#1e88e5;">酷</div>
+            <div class="tile-info">
+                <div class="tile-name">优酷视频</div>
+                <div class="tile-desc">youku.com</div>
+            </div>
+        </a>
+
+        <!-- 听书阅读 -->
+        <a href="https://weread.qq.com" class="tile" data-cat="audio">
+            <div class="tile-icon" style="color:#07c160;">微</div>
+            <div class="tile-info">
+                <div class="tile-name">微信读书</div>
+                <div class="tile-desc">weread.qq.com</div>
+            </div>
+        </a>
+        <a href="https://yuedu.qq.com" class="tile" data-cat="audio">
+            <div class="tile-icon" style="color:#3b82f6;">阅</div>
+            <div class="tile-info">
+                <div class="tile-name">QQ阅读</div>
+                <div class="tile-desc">yuedu.qq.com</div>
+            </div>
+        </a>
+        <a href="https://www.ximalaya.com" class="tile" data-cat="audio">
+            <div class="tile-icon" style="color:#f23030;">喜</div>
+            <div class="tile-info">
+                <div class="tile-name">喜马拉雅</div>
+                <div class="tile-desc">ximalaya.com</div>
+            </div>
+        </a>
+        <a href="https://music.163.com" class="tile" data-cat="audio">
+            <div class="tile-icon" style="color:#e60026;">云</div>
+            <div class="tile-info">
+                <div class="tile-name">网易云音乐</div>
+                <div class="tile-desc">music.163.com</div>
+            </div>
+        </a>
+        <a href="https://y.qq.com" class="tile" data-cat="audio">
+            <div class="tile-icon" style="color:#31c27c;">Ｑ</div>
+            <div class="tile-info">
+                <div class="tile-name">QQ音乐</div>
+                <div class="tile-desc">y.qq.com</div>
+            </div>
+        </a>
+
+        <!-- 搜索与 AI -->
+        <a href="https://www.baidu.com" class="tile" data-cat="ai">
+            <div class="tile-icon" style="color:#2932e1;">度</div>
+            <div class="tile-info">
+                <div class="tile-name">百度搜索</div>
+                <div class="tile-desc">baidu.com</div>
+            </div>
+        </a>
+        <a href="https://chat.deepseek.com" class="tile" data-cat="ai">
+            <div class="tile-icon" style="color:#4d6bfe;">Ｄ</div>
+            <div class="tile-info">
+                <div class="tile-name">DeepSeek</div>
+                <div class="tile-desc">chat.deepseek.com</div>
+            </div>
+        </a>
+        <a href="https://kimi.ai" class="tile" data-cat="ai">
+            <div class="tile-icon" style="color:#f59e0b;">Ｋ</div>
+            <div class="tile-info">
+                <div class="tile-name">Kimi 智能</div>
+                <div class="tile-desc">kimi.ai</div>
+            </div>
+        </a>
+        <a href="https://cn.bing.com" class="tile" data-cat="ai">
+            <div class="tile-icon" style="color:#008373;">应</div>
+            <div class="tile-info">
+                <div class="tile-name">必应搜索</div>
+                <div class="tile-desc">cn.bing.com</div>
+            </div>
+        </a>
+
+        <!-- 汽车社区 -->
+        <a href="https://www.dongchedi.com" class="tile" data-cat="car">
+            <div class="tile-icon" style="color:#fcd535;">懂</div>
+            <div class="tile-info">
+                <div class="tile-name">懂车帝</div>
+                <div class="tile-desc">dongchedi.com</div>
+            </div>
+        </a>
+        <a href="https://www.autohome.com.cn" class="tile" data-cat="car">
+            <div class="tile-icon" style="color:#007aff;">家</div>
+            <div class="tile-info">
+                <div class="tile-name">汽车之家</div>
+                <div class="tile-desc">autohome.com.cn</div>
+            </div>
+        </a>
+        <a href="https://www.zhihu.com" class="tile" data-cat="car">
+            <div class="tile-icon" style="color:#0084ff;">知</div>
+            <div class="tile-info">
+                <div class="tile-name">知乎</div>
+                <div class="tile-desc">zhihu.com</div>
+            </div>
+        </a>
+        <a href="https://weibo.com" class="tile" data-cat="car">
+            <div class="tile-icon" style="color:#e6162d;">博</div>
+            <div class="tile-info">
+                <div class="tile-name">新浪微博</div>
+                <div class="tile-desc">weibo.com</div>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        function goSearch() {
+            var val = document.getElementById('searchInput').value.trim();
+            if (!val) return;
+            if (val.startsWith('http://') || val.startsWith('https://')) {
+                location.href = val;
+            } else if (val.indexOf('.') !== -1 && val.indexOf(' ') === -1) {
+                location.href = 'https://' + val;
+            } else {
+                location.href = 'https://www.baidu.com/s?wd=' + encodeURIComponent(val);
+            }
+        }
+        function handleKey(e) {
+            if (e.key === 'Enter') {
+                goSearch();
+            }
+        }
+        function filterCat(cat, el) {
+            document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+            el.classList.add('active');
+            var tiles = document.querySelectorAll('.tile');
+            tiles.forEach(function(t) {
+                if (cat === 'all' || t.getAttribute('data-cat') === cat) {
+                    t.style.display = 'flex';
+                } else {
+                    t.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

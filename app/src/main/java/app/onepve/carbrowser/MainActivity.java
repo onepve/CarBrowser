@@ -36,7 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_STORAGE_CODE = 1001;
-    private static final String DEFAULT_HOME_URL = "https://cn.bing.com";
+    private static final String DEFAULT_HOME_URL = "file:///android_asset/homepage.html";
 
     private WebView webView;
     private ProgressBar progressBar;
@@ -110,7 +110,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 progressBar.setVisibility(View.VISIBLE);
-                editSearch.setText(url);
+                if (url.startsWith("file:///android_asset/")) {
+                    editSearch.setText("");
+                    editSearch.setHint(R.string.search_hint);
+                } else {
+                    editSearch.setText(url);
+                }
                 updateNavButtons();
             }
 
