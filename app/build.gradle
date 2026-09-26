@@ -10,8 +10,8 @@ android {
         applicationId "app.onepve.carbrowser"
         minSdk 28
         targetSdk 28
-        versionCode 10003
-        versionName "1.0.2"
+        versionCode 10004
+        versionName "1.0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
