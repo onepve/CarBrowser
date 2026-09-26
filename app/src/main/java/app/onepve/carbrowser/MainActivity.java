@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -49,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText editSearch;
     private ImageButton btnBack, btnForward, btnRefresh, btnHome, btnClose, btnFullscreen, btnExitFullscreen, btnThemeMode;
     private LinearLayout btnBookmarks;
+    private LinearLayout layoutSearchBox;
+    private ImageView imgSearchIcon, imgBookmarkIcon;
+    private TextView textBookmarkLabel;
     private FrameLayout fullscreenContainer;
     private View topBar;
 
@@ -118,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
         btnExitFullscreen = findViewById(R.id.btn_exit_fullscreen);
         btnThemeMode = findViewById(R.id.btn_theme_mode);
         btnBookmarks = findViewById(R.id.btn_bookmarks);
+        layoutSearchBox = findViewById(R.id.layout_search_box);
+        imgSearchIcon = findViewById(R.id.img_search_icon);
+        imgBookmarkIcon = findViewById(R.id.img_bookmark_icon);
+        textBookmarkLabel = findViewById(R.id.text_bookmark_label);
         fullscreenContainer = findViewById(R.id.fullscreen_container);
     }
 
@@ -245,16 +253,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyTheme(boolean darkMode) {
-        if (darkMode) {
-            topBar.setBackgroundColor(Color.parseColor("#18181c"));
-            btnThemeMode.setImageResource(R.drawable.ic_sun);
-            editSearch.setTextColor(Color.parseColor("#f3f4f6"));
-            editSearch.setHintTextColor(Color.parseColor("#9ca3af"));
-        } else {
-            topBar.setBackgroundColor(Color.parseColor("#ffffff"));
-            btnThemeMode.setImageResource(R.drawable.ic_moon);
-            editSearch.setTextColor(Color.parseColor("#111827"));
-            editSearch.setHintTextColor(Color.parseColor("#6b7280"));
+        int iconColor = darkMode ? Color.parseColor("#f3f4f6") : Color.parseColor("#1f2937");
+        int btnBgRes = darkMode ? R.drawable.bg_capsule_btn : R.drawable.bg_capsule_btn_light;
+        int topBarBg = darkMode ? Color.parseColor("#18181c") : Color.parseColor("#ffffff");
+
+        topBar.setBackgroundColor(topBarBg);
+
+        // 统一刷新所有控制按键背景与图标对比度颜色
+        ImageButton[] navButtons = {btnBack, btnForward, btnRefresh, btnHome, btnFullscreen, btnClose};
+        for (ImageButton b : navButtons) {
+            if (b != null) {
+                b.setBackgroundResource(btnBgRes);
+                b.setColorFilter(iconColor);
+            }
+        }
+
+        // ☀️/🌙 模式切换胶囊
+        if (btnThemeMode != null) {
+            btnThemeMode.setBackgroundResource(btnBgRes);
+            if (darkMode) {
+                btnThemeMode.setImageResource(R.drawable.ic_sun);
+                btnThemeMode.setColorFilter(Color.parseColor("#f59e0b")); // 温暖金黄太阳
+            } else {
+                btnThemeMode.setImageResource(R.drawable.ic_moon);
+                btnThemeMode.setColorFilter(Color.parseColor("#2563eb")); // 科技深蓝月亮
+            }
+        }
+
+        // 地址栏输入框容器与文本
+        if (layoutSearchBox != null) {
+            layoutSearchBox.setBackgroundResource(darkMode ? R.drawable.bg_search_bar : R.drawable.bg_search_bar_light);
+        }
+        if (imgSearchIcon != null) {
+            imgSearchIcon.setColorFilter(darkMode ? Color.parseColor("#9ca3af") : Color.parseColor("#6b7280"));
+        }
+        if (editSearch != null) {
+            editSearch.setTextColor(darkMode ? Color.parseColor("#f3f4f6") : Color.parseColor("#111827"));
+            editSearch.setHintTextColor(darkMode ? Color.parseColor("#6b7280") : Color.parseColor("#9ca3af"));
+        }
+
+        // ⭐ 常用收藏大胶囊
+        if (btnBookmarks != null) {
+            btnBookmarks.setBackgroundResource(btnBgRes);
+            int starColor = darkMode ? Color.parseColor("#f59e0b") : Color.parseColor("#d97706");
+            if (imgBookmarkIcon != null) imgBookmarkIcon.setColorFilter(starColor);
+            if (textBookmarkLabel != null) textBookmarkLabel.setTextColor(starColor);
         }
 
         // WebSettingsCompat 强制深色或普通
