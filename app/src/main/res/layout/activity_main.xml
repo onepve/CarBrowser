@@ -75,6 +75,18 @@
             android:scaleType="fitCenter"
             android:contentDescription="纯净全屏" />
 
+        <!-- ◧ 左侧车机Dock菜单切换 -->
+        <ImageButton
+            android:id="@+id/btn_dock"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_capsule_btn"
+            android:src="@drawable/ic_dock"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="左侧车机菜单切换" />
+
         <!-- 地址与搜索输入框 -->
         <LinearLayout
             android:id="@+id/layout_search_box"

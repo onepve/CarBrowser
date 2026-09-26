@@ -27,7 +27,7 @@ public class BookmarkManager {
 
         // 听书阅读
         list.add(new BookmarkItem("p6", "微信读书", "https://weread.qq.com", "audio", "微", true));
-        list.add(new BookmarkItem("p7", "QQ阅读", "https://yuedu.qq.com", "audio", "阅", true));
+        list.add(new BookmarkItem("p7", "QQ阅读", "https://ubook.reader.qq.com/", "audio", "阅", true));
         list.add(new BookmarkItem("p8", "喜马拉雅", "https://www.ximalaya.com", "audio", "喜", true));
         list.add(new BookmarkItem("p9", "网易云音乐", "https://music.163.com", "audio", "云", true));
         list.add(new BookmarkItem("p10", "QQ音乐", "https://y.qq.com", "audio", "Ｑ", true));
@@ -36,13 +36,17 @@ public class BookmarkManager {
         list.add(new BookmarkItem("p11", "百度搜索", "https://www.baidu.com", "search", "度", true));
         list.add(new BookmarkItem("p12", "必应搜索", "https://cn.bing.com", "search", "应", true));
         list.add(new BookmarkItem("p13", "DeepSeek", "https://chat.deepseek.com", "search", "Ｄ", true));
-        list.add(new BookmarkItem("p14", "Kimi 智能", "https://kimi.ai", "search", "Ｋ", true));
+        list.add(new BookmarkItem("p14", "豆包 AI", "https://www.doubao.com/chat/", "search", "豆", true));
+        list.add(new BookmarkItem("p15", "Kimi 智能", "https://kimi.ai", "search", "Ｋ", true));
+        list.add(new BookmarkItem("p16", "通义千问", "https://tongyi.aliyun.com/qianwen/", "search", "问", true));
+        list.add(new BookmarkItem("p17", "智谱清言", "https://chatglm.cn", "search", "言", true));
+        list.add(new BookmarkItem("p18", "腾讯元宝", "https://yuanbao.tencent.com", "search", "元", true));
 
         // 汽车与社区资讯
-        list.add(new BookmarkItem("p15", "懂车帝", "https://www.dongchedi.com", "car", "懂", true));
-        list.add(new BookmarkItem("p16", "汽车之家", "https://www.autohome.com.cn", "car", "家", true));
-        list.add(new BookmarkItem("p17", "知乎", "https://www.zhihu.com", "car", "知", true));
-        list.add(new BookmarkItem("p18", "新浪微博", "https://weibo.com", "car", "博", true));
+        list.add(new BookmarkItem("p19", "懂车帝", "https://www.dongchedi.com", "car", "懂", true));
+        list.add(new BookmarkItem("p20", "汽车之家", "https://www.autohome.com.cn", "car", "家", true));
+        list.add(new BookmarkItem("p21", "知乎", "https://www.zhihu.com", "car", "知", true));
+        list.add(new BookmarkItem("p22", "新浪微博", "https://weibo.com", "car", "博", true));
 
         return list;
     }

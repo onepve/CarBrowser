@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private ProgressBar progressBar;
     private EditText editSearch;
-    private ImageButton btnBack, btnForward, btnRefresh, btnHome, btnClose, btnFullscreen, btnExitFullscreen, btnThemeMode;
+    private ImageButton btnBack, btnForward, btnRefresh, btnHome, btnClose, btnFullscreen, btnExitFullscreen, btnDock, btnThemeMode;
     private LinearLayout btnBookmarks;
     private LinearLayout layoutSearchBox;
     private ImageView imgSearchIcon, imgBookmarkIcon;
@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private View topBar;
 
     private boolean isPureFullscreen = false;
+    private boolean showSideDock = false;
     private boolean isDarkMode = true;
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
@@ -98,14 +99,37 @@ public class MainActivity extends AppCompatActivity {
 
     private void setImmersiveMode() {
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-        );
+        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        if (!showSideDock) {
+            // 隐藏左侧车机系统 Dock 菜单（真全屏）
+            flags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        }
+        decorView.setSystemUiVisibility(flags);
+    }
+
+    private void toggleSideDock() {
+        showSideDock = !showSideDock;
+        getSharedPreferences("car_browser_prefs", MODE_PRIVATE)
+            .edit()
+            .putBoolean("show_side_dock", showSideDock)
+            .apply();
+        setImmersiveMode();
+        updateDockButtonState();
+        Toast.makeText(this, showSideDock ? "已显示左侧车机菜单" : "已隐藏左侧菜单 (沉浸全屏)", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateDockButtonState() {
+        if (btnDock == null) return;
+        if (showSideDock) {
+            // 处于分屏/显示侧边栏状态，高亮显示该按钮
+            btnDock.setColorFilter(isDarkMode ? Color.parseColor("#f59e0b") : Color.parseColor("#d97706"));
+        } else {
+            btnDock.setColorFilter(isDarkMode ? Color.parseColor("#f3f4f6") : Color.parseColor("#1f2937"));
+        }
     }
 
     private void initViews() {
@@ -119,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
         btnHome = findViewById(R.id.btn_home);
         btnClose = findViewById(R.id.btn_close);
         btnFullscreen = findViewById(R.id.btn_fullscreen);
+        btnDock = findViewById(R.id.btn_dock);
         btnExitFullscreen = findViewById(R.id.btn_exit_fullscreen);
         btnThemeMode = findViewById(R.id.btn_theme_mode);
         btnBookmarks = findViewById(R.id.btn_bookmarks);
@@ -260,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         topBar.setBackgroundColor(topBarBg);
 
         // 统一刷新所有控制按键背景与图标对比度颜色
-        ImageButton[] navButtons = {btnBack, btnForward, btnRefresh, btnHome, btnFullscreen, btnClose};
+        ImageButton[] navButtons = {btnBack, btnForward, btnRefresh, btnHome, btnFullscreen, btnDock, btnClose};
         for (ImageButton b : navButtons) {
             if (b != null) {
                 b.setBackgroundResource(btnBgRes);
@@ -308,6 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 通知本地主页 HTML 变更样式
         webView.evaluateJavascript("setTheme('" + (darkMode ? "dark" : "light") + "')", null);
+        updateDockButtonState();
     }
 
     private void setupListeners() {
