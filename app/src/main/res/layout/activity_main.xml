@@ -63,6 +63,18 @@
             android:scaleType="fitCenter"
             android:contentDescription="主页" />
 
+        <!-- ⛶ 网页纯净全屏切换 -->
+        <ImageButton
+            android:id="@+id/btn_fullscreen"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_capsule_btn"
+            android:src="@drawable/ic_fullscreen"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="纯净全屏" />
+
         <!-- 地址与搜索输入框 -->
         <LinearLayout
             android:layout_width="0dp"
@@ -95,6 +107,18 @@
                 android:imeOptions="actionGo"
                 android:inputType="textUri" />
         </LinearLayout>
+
+        <!-- ☀️/🌙 日夜模式切换 -->
+        <ImageButton
+            android:id="@+id/btn_theme_mode"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_capsule_btn"
+            android:src="@drawable/ic_sun"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="日夜模式" />
 
         <!-- ⭐ 常用 / 收藏夹胶囊大按钮 (默认常驻显眼) -->
         <LinearLayout
@@ -153,6 +177,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/progress_bar" />
+
+    <!-- 纯净全屏时右上角半透明悬浮恢复按钮 (默认隐藏) -->
+    <ImageButton
+        android:id="@+id/btn_exit_fullscreen"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_floating_btn"
+        android:src="@drawable/ic_fullscreen_exit"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:contentDescription="退出全屏" />
 
     <!-- 全屏视频播放容器 (默认隐藏) -->
     <FrameLayout

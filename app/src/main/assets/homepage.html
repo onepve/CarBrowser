@@ -11,9 +11,28 @@
             padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
+        :root {
+            --bg-color: #101012;
+            --text-color: #f3f4f6;
+            --sub-color: #9ca3af;
+            --card-bg: #18181c;
+            --card-border: #282830;
+            --btn-bg: #1e1e24;
+            --btn-border: #2b2b34;
+            --accent: #f59e0b;
+        }
+        body[data-theme="light"] {
+            --bg-color: #f4f5f7;
+            --text-color: #111827;
+            --sub-color: #6b7280;
+            --card-bg: #ffffff;
+            --card-border: #e5e7eb;
+            --btn-bg: #e5e7eb;
+            --btn-border: #d1d5db;
+        }
         body {
-            background-color: #101012;
-            color: #f3f4f6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
             padding: 24px 32px;
             display: flex;
@@ -21,6 +40,7 @@
             align-items: center;
             min-height: 100vh;
             user-select: none;
+            transition: background-color 0.25s, color 0.25s;
         }
         .header {
             display: flex;
@@ -32,7 +52,7 @@
         .logo-badge {
             width: 36px;
             height: 36px;
-            background: #24242a;
+            background: var(--card-bg);
             border: 1px solid #3b82f6;
             border-radius: 10px;
             display: flex;
@@ -40,13 +60,13 @@
             justify-content: center;
             font-weight: bold;
             font-size: 18px;
-            color: #f59e0b;
+            color: var(--accent);
         }
         .header-title {
             font-size: 20px;
             font-weight: 700;
             letter-spacing: 1px;
-            color: #f3f4f6;
+            color: var(--text-color);
         }
 
         /* 搜索框 */
@@ -54,28 +74,29 @@
             width: 100%;
             max-width: 680px;
             display: flex;
-            background: #18181c;
-            border: 1.5px solid #2b2b34;
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
             border-radius: 28px;
             padding: 6px 16px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
             align-items: center;
+            transition: border-color 0.2s, background-color 0.2s;
         }
         .search-container:focus-within {
-            border-color: #f59e0b;
+            border-color: var(--accent);
         }
         .search-input {
             flex: 1;
             background: transparent;
             border: none;
             outline: none;
-            color: #f3f4f6;
+            color: var(--text-color);
             font-size: 16px;
             padding: 8px 10px;
         }
         .search-btn {
-            background: #f59e0b;
+            background: var(--accent);
             color: #101012;
             border: none;
             border-radius: 20px;
@@ -95,9 +116,9 @@
             padding-bottom: 4px;
         }
         .cat-btn {
-            background: #1e1e24;
-            border: 1px solid #2b2b34;
-            color: #9ca3af;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--sub-color);
             padding: 8px 18px;
             border-radius: 20px;
             font-size: 14px;
@@ -106,9 +127,9 @@
             transition: all 0.2s;
         }
         .cat-btn.active {
-            background: #2b2b34;
-            color: #f59e0b;
-            border-color: #f59e0b;
+            background: var(--card-bg);
+            color: var(--accent);
+            border-color: var(--accent);
             font-weight: 600;
         }
 
@@ -123,8 +144,8 @@
         .tile {
             display: flex;
             align-items: center;
-            background: #18181c;
-            border: 1px solid #282830;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 14px;
             padding: 12px 14px;
             text-decoration: none;
@@ -133,20 +154,20 @@
         }
         .tile:active {
             transform: scale(0.97);
-            background: #25252d;
-            border-color: #f59e0b;
+            filter: brightness(0.9);
+            border-color: var(--accent);
         }
         .tile-icon {
             width: 42px;
             height: 42px;
             border-radius: 10px;
-            background: #24242c;
+            background: var(--btn-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
             font-weight: bold;
-            color: #f59e0b;
+            color: var(--accent);
             margin-right: 12px;
             flex-shrink: 0;
         }
@@ -158,14 +179,14 @@
         .tile-name {
             font-size: 15px;
             font-weight: 600;
-            color: #f3f4f6;
+            color: var(--text-color);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .tile-desc {
             font-size: 12px;
-            color: #9ca3af;
+            color: var(--sub-color);
             margin-top: 2px;
             white-space: nowrap;
             overflow: hidden;
@@ -173,7 +194,7 @@
         }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
     <div class="header">
         <div class="logo-badge">🚗</div>
@@ -333,6 +354,15 @@
     </div>
 
     <script>
+        function setTheme(mode) {
+            document.body.setAttribute('data-theme', mode);
+            try { localStorage.setItem('theme', mode); } catch(e){}
+        }
+        try {
+            var saved = localStorage.getItem('theme');
+            if (saved) document.body.setAttribute('data-theme', saved);
+        } catch(e){}
+
         function goSearch() {
             var val = document.getElementById('searchInput').value.trim();
             if (!val) return;

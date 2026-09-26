@@ -3,8 +3,10 @@ package app.onepve.carbrowser;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -32,24 +34,32 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_STORAGE_CODE = 1001;
+    private static final String PREF_NAME = "car_browser_prefs";
+    private static final String PREF_KEY_DARK = "is_dark_mode";
     private static final String DEFAULT_HOME_URL = "file:///android_asset/homepage.html";
 
     private WebView webView;
     private ProgressBar progressBar;
     private EditText editSearch;
-    private ImageButton btnBack, btnForward, btnRefresh, btnHome, btnClose;
+    private ImageButton btnBack, btnForward, btnRefresh, btnHome, btnClose, btnFullscreen, btnExitFullscreen, btnThemeMode;
     private LinearLayout btnBookmarks;
     private FrameLayout fullscreenContainer;
     private View topBar;
 
+    private boolean isPureFullscreen = false;
+    private boolean isDarkMode = true;
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
 
     private BookmarkManager bookmarkManager;
+    private SharedPreferences prefs;
+
     private String pendingDownloadUrl;
     private String pendingUserAgent;
     private String pendingContentDisposition;
@@ -58,15 +68,40 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setImmersiveMode();
         setContentView(R.layout.activity_main);
 
+        prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        isDarkMode = prefs.getBoolean(PREF_KEY_DARK, true);
         bookmarkManager = new BookmarkManager(this);
+
         initViews();
         setupWebView();
         setupListeners();
+        applyTheme(isDarkMode);
 
-        // 默认加载必应
+        // 默认加载本地秒开主页
         webView.loadUrl(DEFAULT_HOME_URL);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            setImmersiveMode();
+        }
+    }
+
+    private void setImmersiveMode() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        );
     }
 
     private void initViews() {
@@ -79,6 +114,9 @@ public class MainActivity extends AppCompatActivity {
         btnRefresh = findViewById(R.id.btn_refresh);
         btnHome = findViewById(R.id.btn_home);
         btnClose = findViewById(R.id.btn_close);
+        btnFullscreen = findViewById(R.id.btn_fullscreen);
+        btnExitFullscreen = findViewById(R.id.btn_exit_fullscreen);
+        btnThemeMode = findViewById(R.id.btn_theme_mode);
         btnBookmarks = findViewById(R.id.btn_bookmarks);
         fullscreenContainer = findViewById(R.id.fullscreen_container);
     }
@@ -101,10 +139,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (url.startsWith("http://") || url.startsWith("https://")) {
+                if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("file:///")) {
                     return false;
                 }
-                return true; // 拦截并忽略未知 schema (如 alipay, weixin 协议防报错)
+                return true;
             }
 
             @Override
@@ -123,6 +161,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 progressBar.setVisibility(View.GONE);
                 updateNavButtons();
+                // 确保主页主题状态同步
+                if (url != null && url.startsWith("file:///android_asset/")) {
+                    webView.evaluateJavascript("setTheme('" + (isDarkMode ? "dark" : "light") + "')", null);
+                }
             }
         });
 
@@ -138,13 +180,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onReceivedTitle(WebView view, String title) {
-                // 当未聚焦输入框时，可在标题与URL间切换
-            }
-
-            @Override
             public void onShowCustomView(View view, CustomViewCallback callback) {
-                // 全屏视频模式
                 if (customView != null) {
                     callback.onCustomViewHidden();
                     return;
@@ -152,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 customView = view;
                 customViewCallback = callback;
                 topBar.setVisibility(View.GONE);
+                btnExitFullscreen.setVisibility(View.GONE);
                 webView.setVisibility(View.GONE);
                 fullscreenContainer.addView(view);
                 fullscreenContainer.setVisibility(View.VISIBLE);
@@ -163,10 +200,71 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 核心要求：下载拦截并存储至 /storage/emulated/0/Download
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
             checkAndDownload(url, userAgent, contentDisposition, mimeType);
         });
+    }
+
+    private void hideCustomView() {
+        if (customView == null) return;
+        fullscreenContainer.removeView(customView);
+        fullscreenContainer.setVisibility(View.GONE);
+        if (!isPureFullscreen) {
+            topBar.setVisibility(View.VISIBLE);
+        } else {
+            btnExitFullscreen.setVisibility(View.VISIBLE);
+        }
+        webView.setVisibility(View.VISIBLE);
+        if (customViewCallback != null) {
+            customViewCallback.onCustomViewHidden();
+        }
+        customView = null;
+        setImmersiveMode();
+    }
+
+    private void enterPureFullscreen() {
+        isPureFullscreen = true;
+        topBar.setVisibility(View.GONE);
+        btnExitFullscreen.setVisibility(View.VISIBLE);
+        setImmersiveMode();
+        Toast.makeText(this, "已进入纯净全屏，点击右上角浮标恢复", Toast.LENGTH_SHORT).show();
+    }
+
+    private void exitPureFullscreen() {
+        isPureFullscreen = false;
+        topBar.setVisibility(View.VISIBLE);
+        btnExitFullscreen.setVisibility(View.GONE);
+        setImmersiveMode();
+    }
+
+    private void toggleThemeMode() {
+        isDarkMode = !isDarkMode;
+        prefs.edit().putBoolean(PREF_KEY_DARK, isDarkMode).apply();
+        applyTheme(isDarkMode);
+        Toast.makeText(this, isDarkMode ? "已切换至黑夜护眼模式" : "已切换至白天明亮模式", Toast.LENGTH_SHORT).show();
+    }
+
+    private void applyTheme(boolean darkMode) {
+        if (darkMode) {
+            topBar.setBackgroundColor(Color.parseColor("#18181c"));
+            btnThemeMode.setImageResource(R.drawable.ic_sun);
+            editSearch.setTextColor(Color.parseColor("#f3f4f6"));
+            editSearch.setHintTextColor(Color.parseColor("#9ca3af"));
+        } else {
+            topBar.setBackgroundColor(Color.parseColor("#ffffff"));
+            btnThemeMode.setImageResource(R.drawable.ic_moon);
+            editSearch.setTextColor(Color.parseColor("#111827"));
+            editSearch.setHintTextColor(Color.parseColor("#6b7280"));
+        }
+
+        // WebSettingsCompat 强制深色或普通
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+            WebSettingsCompat.setForceDark(webView.getSettings(),
+                darkMode ? WebSettingsCompat.FORCE_DARK_ON : WebSettingsCompat.FORCE_DARK_OFF);
+        }
+
+        // 通知本地主页 HTML 变更样式
+        webView.evaluateJavascript("setTheme('" + (darkMode ? "dark" : "light") + "')", null);
     }
 
     private void setupListeners() {
@@ -187,6 +285,12 @@ public class MainActivity extends AppCompatActivity {
         btnRefresh.setOnClickListener(v -> webView.reload());
 
         btnHome.setOnClickListener(v -> webView.loadUrl(DEFAULT_HOME_URL));
+
+        btnFullscreen.setOnClickListener(v -> enterPureFullscreen());
+
+        btnExitFullscreen.setOnClickListener(v -> exitPureFullscreen());
+
+        btnThemeMode.setOnClickListener(v -> toggleThemeMode());
 
         btnBookmarks.setOnClickListener(v -> showBookmarksDialog());
 
@@ -268,7 +372,6 @@ public class MainActivity extends AppCompatActivity {
         });
         rv.setAdapter(adapter);
 
-        // 分类标签构建
         LinearLayout layoutCats = dialog.findViewById(R.id.layout_categories);
         String[][] categories = {
             {"all", "全部"},
@@ -297,15 +400,16 @@ public class MainActivity extends AppCompatActivity {
             layoutCats.addView(btn);
         }
 
-        // 收藏当前网页
         dialog.findViewById(R.id.btn_add_current).setOnClickListener(v -> {
             String curTitle = webView.getTitle();
             String curUrl = webView.getUrl();
-            if (curUrl != null && !curUrl.isEmpty()) {
+            if (curUrl != null && !curUrl.isEmpty() && !curUrl.startsWith("file:///")) {
                 if (curTitle == null || curTitle.isEmpty()) curTitle = "网页收藏";
                 bookmarkManager.addCustomBookmark(curTitle, curUrl);
                 Toast.makeText(MainActivity.this, "已成功添加至收藏夹: " + curTitle, Toast.LENGTH_SHORT).show();
                 adapter.setData(bookmarkManager.getAllBookmarks(currentCategory[0]));
+            } else {
+                Toast.makeText(MainActivity.this, "主页无需重复收藏", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -339,22 +443,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void hideCustomView() {
-        if (customView == null) return;
-        fullscreenContainer.removeView(customView);
-        fullscreenContainer.setVisibility(View.GONE);
-        topBar.setVisibility(View.VISIBLE);
-        webView.setVisibility(View.VISIBLE);
-        if (customViewCallback != null) {
-            customViewCallback.onCustomViewHidden();
-        }
-        customView = null;
-    }
-
     @Override
     public void onBackPressed() {
         if (customView != null) {
             hideCustomView();
+            return;
+        }
+        if (isPureFullscreen) {
+            exitPureFullscreen();
             return;
         }
         if (webView.canGoBack()) {

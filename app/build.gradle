@@ -10,8 +10,8 @@ android {
         applicationId "app.onepve.carbrowser"
         minSdk 28
         targetSdk 28
-        versionCode 10002
-        versionName "1.0.1"
+        versionCode 10003
+        versionName "1.0.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,6 +53,7 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.webkit:webkit:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
