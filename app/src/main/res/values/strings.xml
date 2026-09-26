@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">极轻车机浏览器</string>
+    <string name="search_hint">输入网址或搜索内容...</string>
+    <string name="bookmarks_title">常用车机网站与收藏夹</string>
+    <string name="btn_add_current">⭐ 收藏当前网页</string>
+    <string name="cat_all">全部</string>
+    <string name="cat_video">影音娱乐</string>
+    <string name="cat_audio">听书阅读</string>
+    <string name="cat_search">搜索与AI</string>
+    <string name="cat_car">汽车资讯</string>
+</resources>

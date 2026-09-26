@@ -1,0 +1,77 @@
+name: Build & Release CarBrowser APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Prepare APK Asset
+        run: |
+          mkdir -p dist
+          APK_SRC=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          if [ -z "$APK_SRC" ]; then
+            echo "::error::Release APK not found!"
+            exit 1
+          fi
+          echo "Found APK: $APK_SRC"
+          cp "$APK_SRC" dist/CarBrowser_1.0.0.apk
+          cd dist
+          md5sum CarBrowser_1.0.0.apk > CarBrowser_1.0.0.apk.md5
+          sha256sum CarBrowser_1.0.0.apk > CarBrowser_1.0.0.apk.sha256
+          echo "MD5: $(cat CarBrowser_1.0.0.apk.md5)"
+          echo "SHA256: $(cat CarBrowser_1.0.0.apk.sha256)"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CarBrowser-APK
+          path: dist/*
+          retention-days: 7
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name || 'v1.0.0' }}
+          name: CarBrowser ${{ github.ref_name || 'v1.0.0' }}
+          body: |
+            ## 极轻车机浏览器 v1.0.0
+            - 专为吉利车机大屏（1920x720）横屏定制
+            - 顶部常驻车规大胶囊按钮（后退、前进、刷新、主页、常用收藏、退出）
+            - 预置国内常用网站收藏夹（哔哩哔哩、抖音、爱奇艺、腾讯视频、优酷、微信读书、QQ阅读、网易云、QQ音乐、百度、必应、DeepSeek、Kimi、懂车帝等）
+            - 默认下载路径定向至车机 Download 目录
+            - 极轻原生 WebView 架构，体积小、低内存无卡顿
+          files: |
+            dist/CarBrowser_1.0.0.apk
+            dist/CarBrowser_1.0.0.apk.md5
+            dist/CarBrowser_1.0.0.apk.sha256

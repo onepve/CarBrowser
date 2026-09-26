@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#101012</color>
+    <color name="bg_surface">#18181c</color>
+    <color name="bg_capsule">#24242a</color>
+    <color name="bg_capsule_hover">#32323a</color>
+    <color name="text_primary">#f3f4f6</color>
+    <color name="text_secondary">#9ca3af</color>
+    <color name="accent_amber">#f59e0b</color>
+    <color name="accent_blue">#3b82f6</color>
+    <color name="border_subtle">#2b2b34</color>
+    <color name="progress_color">#f59e0b</color>
+</resources>

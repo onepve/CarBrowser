@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_dialog_dark"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- 弹窗顶栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@drawable/ic_star" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="@string/bookmarks_title"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- ⭐ 收藏当前网页按钮 -->
+        <LinearLayout
+            android:id="@+id/btn_add_current"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_capsule_btn"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_add" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="收藏当前页"
+                android:textColor="@color/accent_amber"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- 关闭弹窗 -->
+        <ImageButton
+            android:id="@+id/btn_close_dialog"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_capsule_btn"
+            android:src="@drawable/ic_close"
+            android:padding="8dp"
+            android:scaleType="fitCenter" />
+    </LinearLayout>
+
+    <!-- 分类横向切换栏 (单选Tab) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/layout_categories"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:orientation="horizontal">
+            <!-- 动态填充分类胶囊 -->
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- 站点磁贴网格列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_bookmarks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="14dp" />
+
+    <!-- 底部操作提示 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="💡 点击磁贴直接浏览 ｜ 长按自定义收藏项可删除"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+</LinearLayout>
